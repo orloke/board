@@ -9,9 +9,9 @@
     color: white;
     font-weight: bold;
     transition: filter 0.2s;
-
-    &:hover{
-        filter: brightness(0.8);
+    
+    @media (max-width: 768px) {
+        align-items: flex-start;
     }
 
     img{

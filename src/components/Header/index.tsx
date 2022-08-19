@@ -1,30 +1,43 @@
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { SignInButton } from "../SignInButton";
 import styles from "./styles.module.scss";
 
 export const Header = () => {
+  const [changeMenu, setChangeMenu] = useState(false);
   return (
-    <header className={styles.headerContainer}>
-      <div className={styles.headerContent}>
-        <Link href={'/'}>
-            <Image
-            src="/images/logo.svg"
-            alt="Logo Meu board"
-            width={50}
-            height={50}
-            />
-        </Link>
-        <nav>
-          <Link href={"/"}>
-            <a>Home</a>
-          </Link>
-          <Link href={"/board"}>
-            <a>Meu board</a>
-          </Link>
-        </nav>
-        <SignInButton/>
-      </div>
-    </header>
+    <>
+      <header className={styles.headerContainer}>
+        <div className={styles.divMobile}>
+          <div className={styles.imgButton}>
+            <Link href={"/"}>
+              <Image
+                src="/images/logo.svg"
+                alt="Logo Meu board"
+                width={50}
+                height={50}
+              />
+            </Link>
+            <button onClick={() => setChangeMenu(!changeMenu)}>teste</button>
+          </div>
+          <nav>
+            <Link href={"/"}>
+              <a className={changeMenu ? styles.panel : styles.panelVisible}>
+                Home
+              </a>
+            </Link>
+            <Link href={"/board"}>
+              <a className={changeMenu ? styles.panel : styles.panelVisible}>
+                Meu board
+              </a>
+            </Link>
+            <a className={changeMenu ? styles.panel : styles.panelVisible}>
+              <SignInButton />
+            </a>
+          </nav>
+        </div>
+      </header>
+    </>
   );
 };
