@@ -1,62 +1,164 @@
+import { GetServerSideProps } from "next";
+import { getSession } from "next-auth/react";
+import { addDoc, collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import Head from "next/head";
-import { FiCalendar, FiClock, FiEdit, FiEdit2, FiPlus, FiTrash } from "react-icons/fi";
+import { FormEvent, useEffect, useState } from "react";
+import { FiCalendar, FiClock, FiEdit2, FiPlus, FiTrash } from "react-icons/fi";
 import { SupportButton } from "../../components/SupportButton";
+import db from "../../services/firebaseConnect";
 import styles from "./styles.module.scss";
+import { format } from "date-fns";
+import Link from "next/link";
 
-const Board = () => {
+interface BoardProps {
+  user: {
+    name: string;
+    id: string;
+  },
+  data:[{
+    id: string;
+    nome: string;
+    created: string ;
+    tarefa: string;
+    userId: string;
+  }]
+}
+
+
+const Board = ({ user, data }: BoardProps) => {
+  const [input, setInput] = useState("");
+  const [tasks, settasks] = useState(data);
+
+  // useEffect(() => {
+  //   settasks(data)
+  // },[])
+
+  const handleAddTask = async (e: FormEvent) => {
+    e.preventDefault();
+
+    if (input === "") {
+      alert("Preencha alguma tarefa");
+      return;
+    }
+
+    await addDoc(collection(db, "tarefas"), {
+      created: new Date(),
+      tarefa: input,
+      userId: user.id,
+      nome: user.name,
+    })
+      .then((doc) => {
+        alert('Tarefa criada')
+        data.unshift({
+          id: doc.id,
+          created: format(new Date(),'dd MMMM yyyy'),
+          tarefa: input,
+          userId: user.id,
+          nome: user.name,
+        })
+        settasks(data)
+        console.log(tasks);
+        
+        setInput("");
+      })
+      .catch((err) => console.log(err));
+  };
+
   return (
     <>
       <Head>
         <title>Minhas Tarefas - Board</title>
       </Head>
       <main className={styles.container}>
-        <form>
-          <input type="text" placeholder="Digite sua tarefa.." />
+        <form onSubmit={handleAddTask}>
+          <input
+            type="text"
+            placeholder="Digite sua tarefa.."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+          />
           <button type="submit">
             <FiPlus size={25} color="#17181f" />
           </button>
         </form>
 
-        <h1>Você tem 2 tarefas!</h1>
+        <h1>Você tem {tasks.length} {tasks.length === 1 ? 'tarefa' : 'tarefas'}</h1>
 
         <section>
-          <article className={styles.taskList}>
-            <p>Primeira tarefa</p>
-            <div className={styles.actions}>
-              <div>
+          {tasks.map((task, index) => (
+            <article key={index} className={styles.taskList}>
+              <Link href={`board/${task.id}`}>
+                <p>{task.tarefa}</p>
+              </Link>
+              <div className={styles.actions}>
                 <div>
-                  <FiCalendar size={20} color="#ffb800" />
-                  <time>17 de agosto 2022</time>
+                  <div>
+                    <FiCalendar size={20} color="#ffb800" />
+                    <time>{task.created}</time>
+                  </div>
+                  <button>
+                    <FiEdit2 size={20} color="white" />
+                    <span>Editar</span>
+                  </button>
                 </div>
+
                 <button>
-                  <FiEdit2 size={20} color="white" />
-                  <span>Editar</span>
+                  <FiTrash size={20} color="#ff3636" />
+                  <span>Excluir</span>
                 </button>
               </div>
-
-              <button>
-                <FiTrash size={20} color="#ff3636" />
-                <span>Excluir</span>
-              </button>
-            </div>
-          </article>
+            </article>
+          ))}
         </section>
       </main>
-      <div className={styles.vipContainer} >
-        <h3>
-            Obrigado por apoiar esse projeto
-        </h3>
+      <div className={styles.vipContainer}>
+        <h3>Obrigado por apoiar esse projeto</h3>
         <div>
-            <FiClock size={28} color="white" />
-            <time>
-                Última doação foi a 3 dias
-            </time>
+          <FiClock size={28} color="white" />
+          <time>Última doação foi a 3 dias</time>
         </div>
       </div>
 
-      <SupportButton/>
+      <SupportButton />
     </>
   );
 };
 
 export default Board;
+
+export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+  const session = await getSession({ req });
+
+  if (!session?.user) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
+  const user = {
+    name: session.user.name,
+    //@ts-ignore
+    id: session.token.sub,
+  };
+
+  const q = query(collection(db, "tarefas"), where('userId', '==', user.id), orderBy('created', 'desc'));
+  const querySnapshot = await getDocs(q);
+ 
+  const data = querySnapshot.docs.map((doc) =>{
+    return {
+      id: doc.id,
+      ...doc.data(),
+      created: format(doc.data().created.toDate(), 'dd MMMM yyyy'),
+    }
+  })
+
+  return {
+    props: {
+      user,
+      data
+    },
+  };
+};

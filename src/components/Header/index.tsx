@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -12,7 +13,7 @@ export const Header = () => {
         <div className={styles.divMobile}>
           <div className={styles.imgButton}>
             <Link href={"/"}>
-              <Image
+              <img
                 src="/images/logo.svg"
                 alt="Logo Meu board"
                 width={50}

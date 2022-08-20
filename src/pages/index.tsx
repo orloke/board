@@ -1,13 +1,15 @@
 /* eslint-disable @next/next/no-img-element */
+import { GetStaticProps } from "next";
 import Head from "next/head";
+import { useEffect } from "react";
 import styles from "../styles/styles.module.scss";
 
 const Home = () => {
   return (
     <>
-    <Head>
-      <title>Board</title>
-    </Head>
+      <Head>
+        <title>Board</title>
+      </Head>
       <main className={styles.contentContainer}>
         <img src="/images/board-user.svg" alt="Ferramenta board" />
         <section className={styles.callToAction}>
@@ -22,29 +24,6 @@ const Home = () => {
           <span>Apoiadores</span>
           <div className={styles.imagesDonaters}>
             <img src="/images/junior.jpg" alt="usuario 1" />
-            <img src="/images/junior.jpg" alt="usuario 1" />
-            <img src="/images/junior.jpg" alt="usuario 1" />
-            <img src="/images/junior.jpg" alt="usuario 1" />
-            <img src="/images/junior.jpg" alt="usuario 1" />
-            <img src="/images/junior.jpg" alt="usuario 1" />
-            <img src="/images/junior.jpg" alt="usuario 1" />
-            <img src="/images/junior.jpg" alt="usuario 1" />
-            <img src="/images/junior.jpg" alt="usuario 1" />
-            <img src="/images/junior.jpg" alt="usuario 1" />
-            <img src="/images/junior.jpg" alt="usuario 1" />
-            <img src="/images/junior.jpg" alt="usuario 1" />
-            <img src="/images/junior.jpg" alt="usuario 1" />
-            <img src="/images/junior.jpg" alt="usuario 1" />
-            <img src="/images/junior.jpg" alt="usuario 1" />
-            <img src="/images/junior.jpg" alt="usuario 1" />
-            <img src="/images/junior.jpg" alt="usuario 1" />
-            <img src="/images/junior.jpg" alt="usuario 1" />
-            <img src="/images/junior.jpg" alt="usuario 1" />
-            <img src="/images/junior.jpg" alt="usuario 1" />
-            <img src="/images/junior.jpg" alt="usuario 1" />
-            <img src="/images/junior.jpg" alt="usuario 1" />
-            <img src="/images/junior.jpg" alt="usuario 1" />
-            <img src="/images/junior.jpg" alt="usuario 1" />
           </div>
         </div>
       </main>
@@ -53,3 +32,10 @@ const Home = () => {
 };
 
 export default Home;
+
+export const getStaticProps: GetStaticProps = async () => {
+  return {
+    props: {},
+    revalidate: 60 * 60
+  };
+};
