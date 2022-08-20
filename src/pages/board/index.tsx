@@ -1,37 +1,44 @@
 import { GetServerSideProps } from "next";
 import { getSession } from "next-auth/react";
-import { addDoc, collection, getDocs, orderBy, query, where } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  getDocs,
+  orderBy,
+  query,
+  where,
+  doc,
+} from "firebase/firestore";
 import Head from "next/head";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { FiCalendar, FiClock, FiEdit2, FiPlus, FiTrash } from "react-icons/fi";
 import { SupportButton } from "../../components/SupportButton";
 import db from "../../services/firebaseConnect";
 import styles from "./styles.module.scss";
 import { format } from "date-fns";
 import Link from "next/link";
+import { toast } from "react-toastify";
 
 interface BoardProps {
   user: {
     name: string;
     id: string;
-  },
-  data:[{
-    id: string;
-    nome: string;
-    created: string ;
-    tarefa: string;
-    userId: string;
-  }]
+  };
+  data: 
+    {
+      id: string;
+      nome: string;
+      created: string;
+      tarefa: string;
+      userId: string;
+    }[]
+  ;
 }
-
 
 const Board = ({ user, data }: BoardProps) => {
   const [input, setInput] = useState("");
   const [tasks, settasks] = useState(data);
-
-  // useEffect(() => {
-  //   settasks(data)
-  // },[])
 
   const handleAddTask = async (e: FormEvent) => {
     e.preventDefault();
@@ -48,21 +55,31 @@ const Board = ({ user, data }: BoardProps) => {
       nome: user.name,
     })
       .then((doc) => {
-        alert('Tarefa criada')
+        toast.success("Tarefa criada com sucesso", {
+          position: toast.POSITION.TOP_RIGHT
+        });
         data.unshift({
           id: doc.id,
-          created: format(new Date(),'dd MMMM yyyy'),
+          created: format(new Date(), "dd MMMM yyyy"),
           tarefa: input,
           userId: user.id,
           nome: user.name,
-        })
-        settasks(data)
-        console.log(tasks);
-        
+        });
+        settasks(data);
         setInput("");
       })
       .catch((err) => console.log(err));
   };
+
+  const handleDeleteTask = async (id:string) =>{
+    await deleteDoc(doc(db, "tarefas", id)).then(()=>{
+      let taskDeleted = tasks.filter(item=>item.id !== id);
+      settasks(taskDeleted);
+    });
+    toast.warning("Tarefa deletada!", {
+      position: toast.POSITION.TOP_RIGHT
+    }) 
+  }
 
   return (
     <>
@@ -82,7 +99,9 @@ const Board = ({ user, data }: BoardProps) => {
           </button>
         </form>
 
-        <h1>Você tem {tasks.length} {tasks.length === 1 ? 'tarefa' : 'tarefas'}</h1>
+        <h1>
+          Você tem {tasks.length} {tasks.length === 1 ? "tarefa" : "tarefas"}
+        </h1>
 
         <section>
           {tasks.map((task, index) => (
@@ -102,7 +121,7 @@ const Board = ({ user, data }: BoardProps) => {
                   </button>
                 </div>
 
-                <button>
+                <button onClick={() => handleDeleteTask(task.id)}>
                   <FiTrash size={20} color="#ff3636" />
                   <span>Excluir</span>
                 </button>
@@ -144,21 +163,25 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
     id: session.token.sub,
   };
 
-  const q = query(collection(db, "tarefas"), where('userId', '==', user.id), orderBy('created', 'desc'));
+  const q = query(
+    collection(db, "tarefas"),
+    where("userId", "==", user.id),
+    orderBy("created", "desc")
+  );
   const querySnapshot = await getDocs(q);
- 
-  const data = querySnapshot.docs.map((doc) =>{
+
+  const data = querySnapshot.docs.map((doc) => {
     return {
       id: doc.id,
       ...doc.data(),
-      created: format(doc.data().created.toDate(), 'dd MMMM yyyy'),
-    }
-  })
+      created: format(doc.data().created.toDate(), "dd MMMM yyyy"),
+    };
+  });
 
   return {
     props: {
       user,
-      data
+      data,
     },
   };
 };
