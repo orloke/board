@@ -9,10 +9,18 @@ import {
   query,
   where,
   doc,
+  setDoc,
 } from "firebase/firestore";
 import Head from "next/head";
 import { FormEvent, useState } from "react";
-import { FiCalendar, FiClock, FiEdit2, FiPlus, FiTrash } from "react-icons/fi";
+import {
+  FiCalendar,
+  FiClock,
+  FiEdit2,
+  FiPlus,
+  FiTrash,
+  FiX,
+} from "react-icons/fi";
 import { SupportButton } from "../../components/SupportButton";
 import db from "../../services/firebaseConnect";
 import styles from "./styles.module.scss";
@@ -20,28 +28,53 @@ import { format } from "date-fns";
 import Link from "next/link";
 import { toast } from "react-toastify";
 
+interface PropsTaskList {
+  id: string;
+  nome: string;
+  created: string;
+  tarefa: string;
+  userId: string;
+}
+
 interface BoardProps {
   user: {
     name: string;
     id: string;
   };
-  data: 
-    {
-      id: string;
-      nome: string;
-      created: string;
-      tarefa: string;
-      userId: string;
-    }[]
-  ;
+  data: PropsTaskList[];
 }
 
 const Board = ({ user, data }: BoardProps) => {
   const [input, setInput] = useState("");
   const [tasks, settasks] = useState(data);
+  const [editTask, setEditTask] = useState<PropsTaskList | null>(null);
 
   const handleAddTask = async (e: FormEvent) => {
     e.preventDefault();
+
+    if (editTask) {
+      await setDoc(doc(db, "tarefas", editTask.id), {
+        ...editTask,
+        tarefa: input,
+        created: new Date(editTask.created),
+      })
+        .then(() => {
+          let data = tasks;
+          let taskIndex = data.findIndex((item) => item.id === editTask.id);
+          data[taskIndex].tarefa = input;
+          settasks(data);
+          toast.success("Tarefas atualizadas", {
+            position: toast.POSITION.TOP_RIGHT,
+          });
+          setEditTask(null);
+          setInput("");
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+
+      return;
+    }
 
     if (input === "") {
       alert("Preencha alguma tarefa");
@@ -56,7 +89,7 @@ const Board = ({ user, data }: BoardProps) => {
     })
       .then((doc) => {
         toast.success("Tarefa criada com sucesso", {
-          position: toast.POSITION.TOP_RIGHT
+          position: toast.POSITION.TOP_RIGHT,
         });
         data.unshift({
           id: doc.id,
@@ -71,15 +104,24 @@ const Board = ({ user, data }: BoardProps) => {
       .catch((err) => console.log(err));
   };
 
-  const handleDeleteTask = async (id:string) =>{
-    await deleteDoc(doc(db, "tarefas", id)).then(()=>{
-      let taskDeleted = tasks.filter(item=>item.id !== id);
+  const handleDeleteTask = async (id: string) => {
+    await deleteDoc(doc(db, "tarefas", id)).then(() => {
+      let taskDeleted = tasks.filter((item) => item.id !== id);
       settasks(taskDeleted);
     });
     toast.warning("Tarefa deletada!", {
-      position: toast.POSITION.TOP_RIGHT
-    }) 
-  }
+      position: toast.POSITION.TOP_RIGHT,
+    });
+  };
+
+  const handleEditTask = async (task: PropsTaskList) => {
+    setInput(task.tarefa);
+    setEditTask(task);
+  };
+  const handleCancelEdit = () => {
+    setInput("");
+    setEditTask(null);
+  };
 
   return (
     <>
@@ -87,6 +129,15 @@ const Board = ({ user, data }: BoardProps) => {
         <title>Minhas Tarefas - Board</title>
       </Head>
       <main className={styles.container}>
+        {editTask && (
+          <span className={styles.warningEdit}>
+            Você está editando uma tarefa! Aperte no{" "}
+            <button onClick={() => handleCancelEdit()}>
+              <FiX color="red" size={30} />
+            </button>{" "}
+            para cancelar.
+          </span>
+        )}
         <form onSubmit={handleAddTask}>
           <input
             type="text"
@@ -115,7 +166,7 @@ const Board = ({ user, data }: BoardProps) => {
                     <FiCalendar size={20} color="#ffb800" />
                     <time>{task.created}</time>
                   </div>
-                  <button>
+                  <button onClick={() => handleEditTask(task)}>
                     <FiEdit2 size={20} color="white" />
                     <span>Editar</span>
                   </button>

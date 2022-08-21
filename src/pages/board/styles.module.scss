@@ -5,6 +5,17 @@
     background-color: #17181f;
     border-radius: 6px;
 
+    .warningEdit{
+        color: #ffb800;
+        display: flex;
+        align-items: center;
+
+        button{
+            border: none;
+            background-color: transparent;
+        }
+    }
+
     form{
         display: flex;
         justify-content: center;
