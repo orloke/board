@@ -50,6 +50,7 @@ export const getServerSideProps: GetServerSideProps = async ({
 	const id = params?.id as string;
 
 	const session = await getSession({ req });
+	
 
 	const docRef = doc(db, "tarefas", id);
 	const docSnap = await getDoc(docRef).then((snapshot) => {
@@ -61,9 +62,11 @@ export const getServerSideProps: GetServerSideProps = async ({
 			userId: snapshot.data()?.userId,
 		};
 		return data;
-	});
+	}).catch(()=>{
+		return {}
+	})	
 
-	if (!session?.user) {
+	if (!session?.vip || Object.keys(docSnap).length === 0) {
 		return {
 			redirect: {
 				destination: "/board",
