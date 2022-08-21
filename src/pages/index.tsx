@@ -2,6 +2,7 @@
 import { GetStaticProps } from "next";
 import Head from "next/head";
 import { useEffect } from "react";
+import { SupportButton } from "../components/SupportButton";
 import styles from "../styles/styles.module.scss";
 
 const Home = () => {
@@ -26,6 +27,7 @@ const Home = () => {
             <img src="/images/junior.jpg" alt="usuario 1" />
           </div>
         </div>
+        <SupportButton/>
       </main>
     </>
   );
