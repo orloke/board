@@ -3,9 +3,16 @@
 </p>
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+
+## Page Demo
+<div align="center" style="margin-bottom: 20px;">
+<img alt="demonstração da pagina" src="https://user-images.githubusercontent.com/96503495/185817771-fe2aad9c-9130-4fcf-88d5-106151a8b843.gif" width="auto" heigth="auto"/>
+</div>
+
 ## Getting Started
 
 First, run the development server:
+
 
 ```bash
 npm run dev
