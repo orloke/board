@@ -10,7 +10,7 @@ export const SignInButton = () => {
   const {data:session} = useSession() 
 
   return session ? (
-    <button type="button" className={styles.signInButton} onClick={() => {signOut()}}>
+    <button data-testid="component" type="button" className={styles.signInButton} onClick={() => {signOut()}}>
       <img src={session.user?.image} alt='Foto do usuario'/>
       Olá {session.user?.name}
       <FiX color="#737380" className={styles.closeIcon}/>
