@@ -1,8 +1,9 @@
-import {render} from '@testing-library/react'
-import { SupportButton } from '.'
+import { render, screen } from "@testing-library/react";
+import { SupportButton } from ".";
 
-test('should render correctly header', () => {
-  const {debug} = render (
-    <SupportButton/>
-  )
+describe("Layout", () => {
+	it("render SupportButton component", () => {
+		render(<SupportButton />);
+		expect(screen.getByText("Apoiar")).toBeInTheDocument();
+	});
 })
