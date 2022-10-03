@@ -63,6 +63,7 @@ describe("Board Page", () => {
 	it("redirect user if not subscription is found", async () => {
 		(getSession as jest.Mock).mockReturnValueOnce(null);
 		const response = await getServerSideProps({} as any);
+    expect(response).toEqual({ redirect: { destination: '/', permanent: false } });
 	});
 
 	it("redirect user if subscription is found", async () => {
