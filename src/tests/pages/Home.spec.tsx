@@ -16,7 +16,18 @@ jest.mock("firebase/firestore", () => {
 		collection: () => null,
 		getDocs: () => {
 			return {
-				docs: [{ id: 1, data: () =>{return{j: 'oi'}}, }],
+				docs: [
+          { 
+            id: 1, 
+            data: () =>{
+              return{
+                donate: true,
+                lastDonated: new Date('2022-10-03T18:25:26.024Z'),
+                image: "string",
+              }
+            }    
+          }
+        ],
 			};
 		},
 		getFirestore: () => null,
@@ -32,9 +43,9 @@ jest.mock("firebase/app", () => {
 JSON.parse = jest.fn().mockImplementation(() => {
 	return [
 		{
-			id: "11111",
+			id: "1",
 			donate: true,
-			lastDonated: new Date(),
+			lastDonated: new Date('2022-10-03T18:25:26.024Z'),
 			image: "string",
 		},
 	];
@@ -53,6 +64,15 @@ describe("Home Page", () => {
 
 	it("render correctly initial data", async () => {
 		const response = await getStaticProps({});
-		expect(response).toEqual({ props: { users: '[{"id":1,"j":"oi"}]' }, revalidate: 3600 })
+    const responseJSON = JSON.parse(response as any);
+		expect(responseJSON).toEqual(      [
+      {
+        id: '1',
+        donate: true,
+        lastDonated: new Date('2022-10-03T18:25:26.024Z') ,
+        image: 'string'
+      }
+    ]);
+    
 	});
 });
