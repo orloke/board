@@ -42,7 +42,7 @@ interface BoardProps {
 		name: string;
 		id: string;
 		vip: boolean;
-		lastDonate: Date
+		lastDonate: Date;
 	};
 	data: PropsTaskList[];
 }
@@ -191,7 +191,12 @@ const Board = ({ user, data }: BoardProps) => {
 					<h3>Obrigado por apoiar esse projeto</h3>
 					<div>
 						<FiClock size={28} color="white" />
-						<time>Última doação foi a {formatDistance(new Date(user.lastDonate), new Date(), {locale: ptBR})}</time>
+						<time>
+							Última doação foi a{" "}
+							{formatDistance(new Date(user.lastDonate), new Date(), {
+								locale: ptBR,
+							})}
+						</time>
 					</div>
 				</div>
 			)}
@@ -220,7 +225,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
 		//@ts-ignore
 		id: session.token.sub,
 		vip: session.vip,
-		lastDonate: session.lastDonate
+		lastDonate: session.lastDonate,
 	};
 
 	const q = query(

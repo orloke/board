@@ -6,7 +6,7 @@ jest.mock("next-auth/react")
 
 describe("Layout", () => {
   it("renders correctly when signed out", async () => {
-    ;(useSession as jest.Mock).mockReturnValueOnce({
+    (useSession as jest.Mock).mockReturnValueOnce({
       data: null,
       status: "unauthenticated",
     })
